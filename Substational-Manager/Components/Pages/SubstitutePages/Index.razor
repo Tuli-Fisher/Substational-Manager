@@ -1,0 +1,40 @@
+﻿@page "/substitutes"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@implements IAsyncDisposable
+@inject IDbContextFactory<SchedulingContext> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="substitutes/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Substitutes">
+    <PropertyColumn Property="substitute => substitute.FullName" />
+    <PropertyColumn Property="substitute => substitute.Email" />
+    <PropertyColumn Property="substitute => substitute.Phone" />
+    <PropertyColumn Property="substitute => substitute.HasText" />
+    <PropertyColumn Property="substitute => substitute.Availability" />
+    <PropertyColumn Property="substitute => substitute.IsActive" />
+    <PropertyColumn Property="substitute => substitute.Notes" />
+
+    <TemplateColumn Context="substitute">
+        <a href="@($"substitutes/edit?id={substitute.Id}")">Edit</a> |
+        <a href="@($"substitutes/details?id={substitute.Id}")">Details</a> |
+        <a href="@($"substitutes/delete?id={substitute.Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private SchedulingContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

@@ -1,0 +1,146 @@
+﻿@page "/jobs/edit"
+@using Microsoft.EntityFrameworkCore
+@using Substational_Manager.Data.Models;
+@inject IDbContextFactory<SchedulingContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Job</h2>
+<hr />
+@if (Job is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Job" OnValidSubmit="UpdateJob" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Job.Id" value="@Job.Id" />
+                <div class="mb-3">
+                    <label for="date" class="form-label">Date:</label>
+                    <InputDate id="date" @bind-Value="Job.Date" class="form-control" aria-required="true"/>
+                    <ValidationMessage For="() => Job.Date" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="period" class="form-label">Period:</label>
+                    @*didnt work cuase its an enum*@
+                  @*   <InputText id="period" @bind-Value="Job.Period" class="form-control" />
+                    <ValidationMessage For="() => Job.Period" class="text-danger" /> *@
+
+                        @*need to update this to allow flag operations*@
+                    <InputSelect id="status" @bind-Value="Job.Period" class="form-control">
+                        @foreach (JobStatus s in Enum.GetValues(typeof(JobStatus))) {
+                            <option value="@s">@s</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => Job.Period)" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="starttime" class="form-label">StartTime:</label>
+                    <InputDate id="starttime" @bind-Value="Job.StartTime" class="form-control" />
+                    <ValidationMessage For="() => Job.StartTime" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="endtime" class="form-label">EndTime:</label>
+                    <InputDate id="endtime" @bind-Value="Job.EndTime" class="form-control" />
+                    <ValidationMessage For="() => Job.EndTime" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="schoolid" class="form-label">SchoolId:</label>
+                    <InputNumber id="schoolid" @bind-Value="Job.SchoolId" class="form-control" aria-required="true"/>
+                    <ValidationMessage For="() => Job.SchoolId" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="substituteid" class="form-label">SubstituteId:</label>
+                    <InputNumber id="substituteid" @bind-Value="Job.SubstituteId" class="form-control" />
+                    <ValidationMessage For="() => Job.SubstituteId" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="status" class="form-label">Status:</label>
+                    @*this didnt work because its anum*@
+                    @* <InputText id="status" @bind-Value="Job.Status" class="form-control" />
+                    <ValidationMessage For="() => Job.Status" class="text-danger" /> *@
+
+                    <InputSelect id="status" @bind-Value="Job.Status" class="form-control">
+                        @foreach (JobStatus s in Enum.GetValues(typeof(JobStatus))) {
+                            <option value="@s">@s</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => Job.Status)" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="paymentperhour" class="form-label">PaymentPerHour:</label>
+                    <InputNumber id="paymentperhour" @bind-Value="Job.PaymentPerHour" class="form-control" />
+                    <ValidationMessage For="() => Job.PaymentPerHour" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="notes" class="form-label">Notes:</label>
+                    <InputText id="notes" @bind-Value="Job.Notes" class="form-control" />
+                    <ValidationMessage For="() => Job.Notes" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/jobs">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private Job? Job { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Job ??= await context.Jobs.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (Job is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateJob()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Job!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!JobExists(Job!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/jobs");
+    }
+
+    private bool JobExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Jobs.Any(e => e.Id == id);
+    }
+}

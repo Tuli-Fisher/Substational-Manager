@@ -1,0 +1,114 @@
+﻿@page "/jobs/create"
+@using Microsoft.EntityFrameworkCore
+@using Substational_Manager.Data.Models;
+@inject IDbContextFactory<SchedulingContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>Sessions</h2>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Job" OnValidSubmit="AddJob" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+
+
+            <div class="mb-3">
+                <label for="date" class="form-label">Date:</label> 
+                <InputDate id="date" @bind-Value="Job.Date" class="form-control" aria-required="true"/> 
+                <ValidationMessage For="() => Job.Date" class="text-danger" /> 
+            </div>        
+
+
+            @* <div class="mb-3">
+                <label for="period" class="form-label">Period:</label> 
+
+                @* <InputText id="period" @bind-Value="Job.Period" class="form-control" /> 
+                <ValidationMessage For="() => Job.Period" class="text-danger" />  *@
+
+                @*<InputSelect id="status" @bind-Value="Job.Period" class="form-control">
+                    @foreach (Period s in Enum.GetValues(typeof(Period))) {
+                        <option value="@s">@s</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="@(() => Job.Period)" class="text-danger" />
+            </div>        
+            <div class="mb-3">
+                <label for="starttime" class="form-label">StartTime:</label> 
+                <InputDate Type="InputDateType.Time" id="starttime" @bind-Value="Job.StartTime" class="form-control" />
+                <ValidationMessage For="() => Job.StartTime" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="endtime" class="form-label">EndTime:</label> 
+                <InputDate Type="InputDateType.Time" id="endtime" @bind-Value="Job.EndTime" class="form-control" />
+                <ValidationMessage For="() => Job.EndTime" class="text-danger" /> 
+            </div>         *@
+
+            <div>
+                <MyCustomPicker @bind-Value = "Job.Period" 
+                @bind-StartTime = "Job.StartTime"
+                @bind-EndTime = "Job.EndTime"/>
+            </div>
+
+
+            <div class="mb-3">
+                <label for="schoolid" class="form-label">SchoolId:</label> 
+                <InputNumber id="schoolid" @bind-Value="Job.SchoolId" class="form-control" aria-required="true"/> 
+                <ValidationMessage For="() => Job.SchoolId" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="substituteid" class="form-label">SubstituteId:</label> 
+                <InputNumber id="substituteid" @bind-Value="Job.SubstituteId" class="form-control" /> 
+                <ValidationMessage For="() => Job.SubstituteId" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="status" class="form-label">Status:</label> 
+                @* <InputText id="status" @bind-Value="Job.Status" class="form-control" /> 
+                <ValidationMessage For="() => Job.Status" class="text-danger" />  *@
+
+                <InputSelect id="status" @bind-Value="Job.Status" class="form-control">
+                    @foreach (JobStatus s in Enum.GetValues(typeof(JobStatus))) {
+                        <option value="@s">@s</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="@(() => Job.Status)" class="text-danger" />
+
+            </div>        
+            <div class="mb-3">
+                <label for="paymentperhour" class="form-label">PaymentPerHour:</label> 
+                <InputNumber id="paymentperhour" @bind-Value="Job.PaymentPerHour" class="form-control" /> 
+                <ValidationMessage For="() => Job.PaymentPerHour" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="notes" class="form-label">Notes:</label> 
+                <InputText id="notes" @bind-Value="Job.Notes" class="form-control" /> 
+                <ValidationMessage For="() => Job.Notes" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/jobs">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private Job Job { get; set; } = new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddJob()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Jobs.Add(Job);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/jobs");
+    }
+}

@@ -1,0 +1,54 @@
+﻿@page "/schools/details"
+@using Microsoft.EntityFrameworkCore
+@using Substational_Manager.Data.Models;
+@inject IDbContextFactory<SchedulingContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>School</h2>
+    <hr />
+    @if (school is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Name</dt>
+            <dd class="col-sm-10">@school.Name</dd>
+            <dt class="col-sm-2">Address</dt>
+            <dd class="col-sm-10">@school.Address</dd>
+            <dt class="col-sm-2">ContactPerson</dt>
+            <dd class="col-sm-10">@school.ContactPerson</dd>
+            <dt class="col-sm-2">Phone</dt>
+            <dd class="col-sm-10">@school.Phone</dd>
+            <dt class="col-sm-2">Email</dt>
+            <dd class="col-sm-10">@school.Email</dd>
+        </dl>
+        <div>
+            <a href="@($"/schools/edit?id={school.Id}")">Edit</a> |
+            <a href="@($"/schools")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private School? school;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        school = await context.Schools.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (school is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

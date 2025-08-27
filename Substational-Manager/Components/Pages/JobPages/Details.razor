@@ -1,0 +1,62 @@
+﻿@page "/jobs/details"
+@using Microsoft.EntityFrameworkCore
+@using Substational_Manager.Data.Models;
+@inject IDbContextFactory<SchedulingContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Job</h2>
+    <hr />
+    @if (job is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Date</dt>
+            <dd class="col-sm-10">@job.Date</dd>
+            <dt class="col-sm-2">Period</dt>
+            <dd class="col-sm-10">@job.Period</dd>
+            <dt class="col-sm-2">StartTime</dt>
+            <dd class="col-sm-10">@job.StartTime</dd>
+            <dt class="col-sm-2">EndTime</dt>
+            <dd class="col-sm-10">@job.EndTime</dd>
+            <dt class="col-sm-2">SchoolId</dt>
+            <dd class="col-sm-10">@job.SchoolId</dd>
+            <dt class="col-sm-2">SubstituteId</dt>
+            <dd class="col-sm-10">@job.SubstituteId</dd>
+            <dt class="col-sm-2">Status</dt>
+            <dd class="col-sm-10">@job.Status</dd>
+            <dt class="col-sm-2">PaymentPerHour</dt>
+            <dd class="col-sm-10">@job.PaymentPerHour</dd>
+            <dt class="col-sm-2">Notes</dt>
+            <dd class="col-sm-10">@job.Notes</dd>
+        </dl>
+        <div>
+            <a href="@($"/jobs/edit?id={job.Id}")">Edit</a> |
+            <a href="@($"/jobs")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Job? job;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        job = await context.Jobs.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (job is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

@@ -1,0 +1,82 @@
+﻿@page "/substitutes/create"
+@using Microsoft.EntityFrameworkCore
+@using Substational_Manager.Data.Models;
+@inject IDbContextFactory<SchedulingContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>Substitute</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Substitute" OnValidSubmit="AddSubstitute" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="fullname" class="form-label">FullName:</label> 
+                <InputText id="fullname" @bind-Value="Substitute.FullName" class="form-control" aria-required="true"/> 
+                <ValidationMessage For="() => Substitute.FullName" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="email" class="form-label">Email:</label> 
+                <InputText id="email" @bind-Value="Substitute.Email" class="form-control" /> 
+                <ValidationMessage For="() => Substitute.Email" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="phone" class="form-label">Phone:</label> 
+                <InputText id="phone" @bind-Value="Substitute.Phone" class="form-control" /> 
+                <ValidationMessage For="() => Substitute.Phone" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="hastext" class="form-label">HasText:</label> 
+                <InputCheckbox id="hastext" @bind-Value="Substitute.HasText" class="form-check-input" /> 
+                <ValidationMessage For="() => Substitute.HasText" class="text-danger" /> 
+            </div>    
+            
+            <div class="mb-3">
+                <label for="availability" class="form-label">Availability:</label> 
+                @* <InputText id="availability" @bind-Value="Substitute.Availability" class="form-control" /> 
+                <ValidationMessage For="() => Substitute.Availability" class="text-danger" />  *@
+                <InputSelect id="availability" @bind-Value="Substitute.Availability" class="form-control">
+                    @foreach (Availability s in Enum.GetValues(typeof(Availability))) {
+                        <option value="@s">@s</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="@(() => Substitute.Availability)" class="text-danger" />
+            </div>     
+            
+            <div class="mb-3">
+                <label for="isactive" class="form-label">IsActive:</label> 
+                <InputCheckbox id="isactive" @bind-Value="Substitute.IsActive" class="form-check-input" /> 
+                <ValidationMessage For="() => Substitute.IsActive" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="notes" class="form-label">Notes:</label> 
+                <InputText id="notes" @bind-Value="Substitute.Notes" class="form-control" /> 
+                <ValidationMessage For="() => Substitute.Notes" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/substitutes">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private Substitute Substitute { get; set; } = new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddSubstitute()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Substitutes.Add(Substitute);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/substitutes");
+    }
+}

@@ -1,0 +1,125 @@
+﻿@page "/substitutes/edit"
+@using Microsoft.EntityFrameworkCore
+@using Substational_Manager.Data.Models;
+@inject IDbContextFactory<SchedulingContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Substitute</h2>
+<hr />
+@if (Substitute is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Substitute" OnValidSubmit="UpdateSubstitute" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Substitute.Id" value="@Substitute.Id" />
+                <div class="mb-3">
+                    <label for="fullname" class="form-label">FullName:</label>
+                    <InputText id="fullname" @bind-Value="Substitute.FullName" class="form-control" aria-required="true"/>
+                    <ValidationMessage For="() => Substitute.FullName" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email:</label>
+                    <InputText id="email" @bind-Value="Substitute.Email" class="form-control" />
+                    <ValidationMessage For="() => Substitute.Email" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="phone" class="form-label">Phone:</label>
+                    <InputText id="phone" @bind-Value="Substitute.Phone" class="form-control" />
+                    <ValidationMessage For="() => Substitute.Phone" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="hastext" class="form-label">HasText:</label>
+                    <InputCheckbox id="hastext" @bind-Value="Substitute.HasText" class="form-check-input" />
+                    <ValidationMessage For="() => Substitute.HasText" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="availability" class="form-label">Availability:</label>
+                    @* <InputText id="availability" @bind-Value="Substitute.Availability" class="form-control" />
+                    <ValidationMessage For="() => Substitute.Availability" class="text-danger" /> *@
+                    <InputSelect id="availability" @bind-Value="Substitute.Availability" class="form-control">
+                        @foreach (Availability s in Enum.GetValues(typeof(Availability))) {
+                            <option value="@s">@s</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => Substitute.Availability)" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="isactive" class="form-label">IsActive:</label>
+                    <InputCheckbox id="isactive" @bind-Value="Substitute.IsActive" class="form-check-input" />
+                    <ValidationMessage For="() => Substitute.IsActive" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="notes" class="form-label">Notes:</label>
+                    <InputText id="notes" @bind-Value="Substitute.Notes" class="form-control" />
+                    <ValidationMessage For="() => Substitute.Notes" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/substitutes">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private Substitute? Substitute { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Substitute ??= await context.Substitutes.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (Substitute is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateSubstitute()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Substitute!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!SubstituteExists(Substitute!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/substitutes");
+    }
+
+    private bool SubstituteExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Substitutes.Any(e => e.Id == id);
+    }
+}

@@ -1,0 +1,87 @@
+﻿@page "/jobs/delete"
+@using Microsoft.EntityFrameworkCore
+@using Substational_Manager.Data.Models;
+@inject IDbContextFactory<SchedulingContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete</PageTitle>
+
+<h1>Delete</h1>
+
+<p>Are you sure you want to delete this?</p>
+<div>
+    <h2>Job</h2>
+    <hr />
+    @if (job is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Date</dt>
+            <dd class="col-sm-10">@job.Date</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Period</dt>
+            <dd class="col-sm-10">@job.Period</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">StartTime</dt>
+            <dd class="col-sm-10">@job.StartTime</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">EndTime</dt>
+            <dd class="col-sm-10">@job.EndTime</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">SchoolId</dt>
+            <dd class="col-sm-10">@job.SchoolId</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">SubstituteId</dt>
+            <dd class="col-sm-10">@job.SubstituteId</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Status</dt>
+            <dd class="col-sm-10">@job.Status</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">PaymentPerHour</dt>
+            <dd class="col-sm-10">@job.PaymentPerHour</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Notes</dt>
+            <dd class="col-sm-10">@job.Notes</dd>
+        </dl>
+        <EditForm method="post" Model="job" OnValidSubmit="DeleteJob" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(job is null)">Delete</button> |
+            <a href="/jobs">Back to List</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private Job? job;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        job = await context.Jobs.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (job is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task DeleteJob()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Jobs.Remove(job!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/jobs");
+    }
+}

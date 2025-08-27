@@ -1,0 +1,64 @@
+﻿@page "/schools/create"
+@using Microsoft.EntityFrameworkCore
+@using Substational_Manager.Data.Models;
+@inject IDbContextFactory<SchedulingContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>School</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="School" OnValidSubmit="AddSchool" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="name" class="form-label">Name:</label> 
+                <InputText id="name" @bind-Value="School.Name" class="form-control" aria-required="true"/> 
+                <ValidationMessage For="() => School.Name" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="address" class="form-label">Address:</label> 
+                <InputText id="address" @bind-Value="School.Address" class="form-control" /> 
+                <ValidationMessage For="() => School.Address" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="contactperson" class="form-label">ContactPerson:</label> 
+                <InputText id="contactperson" @bind-Value="School.ContactPerson" class="form-control" /> 
+                <ValidationMessage For="() => School.ContactPerson" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="phone" class="form-label">Phone:</label> 
+                <InputText id="phone" @bind-Value="School.Phone" class="form-control" /> 
+                <ValidationMessage For="() => School.Phone" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="email" class="form-label">Email:</label> 
+                <InputText id="email" @bind-Value="School.Email" class="form-control" /> 
+                <ValidationMessage For="() => School.Email" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/schools">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private School School { get; set; } = new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddSchool()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Schools.Add(School);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/schools");
+    }
+}

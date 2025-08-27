@@ -1,0 +1,42 @@
+﻿@page "/jobs"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@implements IAsyncDisposable
+@inject IDbContextFactory<SchedulingContext> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="jobs/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Jobs">
+    <PropertyColumn Property="job => job.Date" />
+    <PropertyColumn Property="job => job.Period" />
+    <PropertyColumn Property="job => job.StartTime" />
+    <PropertyColumn Property="job => job.EndTime" />
+    <PropertyColumn Property="job => job.SchoolId" />
+    <PropertyColumn Property="job => job.SubstituteId" />
+    <PropertyColumn Property="job => job.Status" />
+    <PropertyColumn Property="job => job.PaymentPerHour" />
+    <PropertyColumn Property="job => job.Notes" />
+
+    <TemplateColumn Context="job">
+        <a href="@($"jobs/edit?id={job.Id}")">Edit</a> |
+        <a href="@($"jobs/details?id={job.Id}")">Details</a> |
+        <a href="@($"jobs/delete?id={job.Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private SchedulingContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

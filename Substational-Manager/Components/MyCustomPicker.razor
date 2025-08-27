@@ -1,0 +1,64 @@
+﻿
+@using Microsoft.AspNetCore.Components.Forms
+@using Substational_Manager.Data.Models;
+
+
+
+<div class="mb-3">
+    <label for="period" class="form-label">Period:</label>
+
+    <InputSelect id="period" @bind-Value=" Value" class="form-control">
+        @foreach (Period p in Enum.GetValues(typeof(Period)))
+        {
+            <option @value="p">@p</option>
+        }
+    </InputSelect>
+    <ValidationMessage For="@(() => Value)" class="text-danger" />
+
+
+
+    @if(Value == Period.Custom)
+    {
+     <div class="mb-3">
+           <label for="starttime" class="form-label">StartTime:</label>
+           <InputDate Type="InputDateType.Time" id="starttime" @bind-Value="StartTime" class="form-control" />
+          <ValidationMessage For="@(() => StartTime)" class="text-danger" />
+     </div>
+     <div class="mb-3">
+          <label for="endtime" class="form-label">EndTime:</label>
+            <InputDate Type="InputDateType.Time" id="endtime" @bind-Value="EndTime" class="form-control" />
+            <ValidationMessage For="@(() => EndTime)" class="text-danger" />
+    </div>
+    }
+</div>
+
+
+
+@code {
+    [Parameter] public Period Value { get; set; }
+    [Parameter] public EventCallback<Period> ValueChanged { get; set; }
+
+    [Parameter] public TimeOnly? StartTime { get; set; }
+    [Parameter] public EventCallback<TimeOnly?> StartTimeChanged { get; set; }
+
+    [Parameter] public TimeOnly? EndTime { get; set; }
+    [Parameter] public EventCallback<TimeOnly?> EndTimeChanged { get; set; }
+
+    private async Task OnPeriodChanged(Period p)
+    {
+        Value = p;
+        await ValueChanged.InvokeAsync(p);
+    }
+
+    private async Task OnStartTimeChanged(TimeOnly? t)
+    {
+        StartTime = t;
+        await StartTimeChanged.InvokeAsync(t);
+    }
+
+    private async Task OnEndTimeChanged(TimeOnly? t)
+    {
+        EndTime = t;
+        await EndTimeChanged.InvokeAsync(t);
+    }
+}

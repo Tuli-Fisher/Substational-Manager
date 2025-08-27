@@ -1,0 +1,109 @@
+﻿@page "/schools/edit"
+@using Microsoft.EntityFrameworkCore
+@using Substational_Manager.Data.Models;
+@inject IDbContextFactory<SchedulingContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>School</h2>
+<hr />
+@if (School is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="School" OnValidSubmit="UpdateSchool" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="School.Id" value="@School.Id" />
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name:</label>
+                    <InputText id="name" @bind-Value="School.Name" class="form-control" aria-required="true"/>
+                    <ValidationMessage For="() => School.Name" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="address" class="form-label">Address:</label>
+                    <InputText id="address" @bind-Value="School.Address" class="form-control" />
+                    <ValidationMessage For="() => School.Address" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="contactperson" class="form-label">ContactPerson:</label>
+                    <InputText id="contactperson" @bind-Value="School.ContactPerson" class="form-control" />
+                    <ValidationMessage For="() => School.ContactPerson" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="phone" class="form-label">Phone:</label>
+                    <InputText id="phone" @bind-Value="School.Phone" class="form-control" />
+                    <ValidationMessage For="() => School.Phone" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email:</label>
+                    <InputText id="email" @bind-Value="School.Email" class="form-control" />
+                    <ValidationMessage For="() => School.Email" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/schools">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private School? School { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        School ??= await context.Schools.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (School is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateSchool()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(School!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!SchoolExists(School!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/schools");
+    }
+
+    private bool SchoolExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Schools.Any(e => e.Id == id);
+    }
+}

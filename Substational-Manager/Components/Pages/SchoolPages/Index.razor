@@ -1,0 +1,38 @@
+﻿@page "/schools"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@implements IAsyncDisposable
+@inject IDbContextFactory<SchedulingContext> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="schools/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Schools">
+    <PropertyColumn Property="school => school.Name" />
+    <PropertyColumn Property="school => school.Address" />
+    <PropertyColumn Property="school => school.ContactPerson" />
+    <PropertyColumn Property="school => school.Phone" />
+    <PropertyColumn Property="school => school.Email" />
+
+    <TemplateColumn Context="school">
+        <a href="@($"schools/edit?id={school.Id}")">Edit</a> |
+        <a href="@($"schools/details?id={school.Id}")">Details</a> |
+        <a href="@($"schools/delete?id={school.Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private SchedulingContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

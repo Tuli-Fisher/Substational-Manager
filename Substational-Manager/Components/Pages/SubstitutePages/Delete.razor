@@ -1,0 +1,79 @@
+﻿@page "/substitutes/delete"
+@using Microsoft.EntityFrameworkCore
+@using Substational_Manager.Data.Models;
+@inject IDbContextFactory<SchedulingContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete</PageTitle>
+
+<h1>Delete</h1>
+
+<p>Are you sure you want to delete this?</p>
+<div>
+    <h2>Substitute</h2>
+    <hr />
+    @if (substitute is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">FullName</dt>
+            <dd class="col-sm-10">@substitute.FullName</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Email</dt>
+            <dd class="col-sm-10">@substitute.Email</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Phone</dt>
+            <dd class="col-sm-10">@substitute.Phone</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">HasText</dt>
+            <dd class="col-sm-10">@substitute.HasText</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Availability</dt>
+            <dd class="col-sm-10">@substitute.Availability</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">IsActive</dt>
+            <dd class="col-sm-10">@substitute.IsActive</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Notes</dt>
+            <dd class="col-sm-10">@substitute.Notes</dd>
+        </dl>
+        <EditForm method="post" Model="substitute" OnValidSubmit="DeleteSubstitute" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(substitute is null)">Delete</button> |
+            <a href="/substitutes">Back to List</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private Substitute? substitute;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        substitute = await context.Substitutes.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (substitute is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task DeleteSubstitute()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Substitutes.Remove(substitute!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/substitutes");
+    }
+}
